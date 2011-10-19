@@ -67,9 +67,10 @@ class TestDynamicModuleLoad < MiniTest::Unit::TestCase
                 $LOAD_PATH.unshift(some_path)
             end
 
-            require 'foo'
-            assert_equals foo.test_method(5)
-
+            require 'foobar'
+            mymod = Kernel.const_get('FooBar')
+            mymethod = mymod.method('test_method')
+            assert_equal 25, mymethod.call(5)
         ensure
             $LOAD_PATH.shift
         end
