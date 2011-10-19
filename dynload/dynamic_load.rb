@@ -47,15 +47,36 @@ class TestDynamicModuleLoad < MiniTest::Unit::TestCase
     end
 
     def test_patch_import_path
-        some_path = File.expand_path('~/no/way/in/hell/does/this/path/exist/lib')
-        refute_includes $LOAD_PATH, some_path
+        begin
+            some_path = File.expand_path('~/no/way/in/hell/does/this/path/exist/lib')
+            refute_includes $LOAD_PATH, some_path
 
-        if !$LOAD_PATH.include?(some_path)
-            $LOAD_PATH.unshift(some_path)
+            if !$LOAD_PATH.include?(some_path)
+                $LOAD_PATH.unshift(some_path)
+            end
+            assert_includes $LOAD_PATH, some_path
+        ensure
+            $LOAD_PATH.shift
         end
-        assert_includes $LOAD_PATH, some_path
     end
+
+    def test_load_new_code
+        begin
+            some_path = File.expand_path('newlib')
+            if !$LOAD_PATH.include?(some_path)
+                $LOAD_PATH.unshift(some_path)
+            end
+
+            require 'foo'
+            assert_equals foo.test_method(5)
+
+        ensure
+            $LOAD_PATH.shift
+        end
+    end
+
 end
+
 
 
 
